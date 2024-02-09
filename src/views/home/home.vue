@@ -1,5 +1,16 @@
 <template>
 	<div class="lottery-row">
+		<div>
+			<label for="">是否開獎過</label>
+			<input type="text" v-model="customValue" @input="comparison">
+			<p>請輸入六個號碼 範例：1,2,3,4,5,6</p>
+			<p>比對結果：</p>
+			<template v-if="comparisonResults && customValue">
+				<p v-if="comparisonResults">{{comparisonResults.Lotterydate}}</p>
+				<p v-if="comparisonResults">{{comparisonResults.Drawnumbersize}}</p>
+			</template>
+			<span v-else-if="customValue">無結果</span>
+		</div>
 		<div class="">
 			<table>
 				<thead>
@@ -16,17 +27,6 @@
 					</tr>
 				</tbody>
 			</table>
-		</div>
-		<div>
-			<label for="">是否開獎過</label>
-			<input type="text" v-model="customValue" @input="comparison">
-			<p>請輸入六個號碼 範例：1,2,3,4,5,6</p>
-			<p>比對結果：</p>
-			<template v-if="comparisonResults && customValue">
-				<p v-if="comparisonResults">{{comparisonResults.Lotterydate}}</p>
-				<p v-if="comparisonResults">{{comparisonResults.Drawnumbersize}}</p>
-			</template>
-			<span v-else-if="customValue">無結果</span>
 		</div>
 	</div>
 </template>
@@ -99,13 +99,17 @@ table{
 
 input {
 	padding: 8px 16px;
-	width: 100%;
+	width: calc(100% - 32px);
 }
 
 
 .lottery-row {
-	display: flex;
-	gap: 24px 24px;
+	// display: flex;
+	// flex-wrap: wrap;
+	// gap: 24px 24px;
 	width: 100%;
+	// > div {
+	// 	width: 100%;
+	// }
 }
 </style>
