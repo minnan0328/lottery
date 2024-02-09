@@ -10,8 +10,9 @@
 				<p v-if="comparisonResults">{{comparisonResults.Drawnumbersize}}</p>
 			</template>
 			<span v-else-if="customValue">無結果</span>
+			<button @click="reset">清除</button>
 		</div>
-		<div class="">
+		<div class="lottery-table">
 			<table>
 				<thead>
 					<tr>
@@ -39,7 +40,7 @@ import type { LotteryData } from '@/types';
 const lotteryData = ref<LotteryData[]>(dataJson);
 const lotteryThead = reactive(['Lotterydate', 'Drawnumbersize']);
 const customValue = ref<string>("");
-	const comparisonResults = ref<string | object | null>(null);
+const comparisonResults = ref<string | object | null>(null);
 
 const combinations = new Map<string, number>();
 
@@ -51,17 +52,26 @@ const matchLottery = (lottery: string, idx: number) => {
 
 	combinations.set(numbersBeforeSixth, idx);
 
+	// console.log(numbersBeforeSixth);
+	
+
 	return numbersBeforeSixth;
 };
 
 const comparison = (event: Event)  => {
 	const target = event.target as HTMLInputElement;
 	const index: number | undefined = combinations.get(customValue.value);
+	console.log(index);
+	
 
-	comparisonResults.value = index && combinations.has(customValue.value) ? lotteryData.value[index] : null;
-
+	comparisonResults.value = index != null && combinations.has(customValue.value) ? lotteryData.value[index] : null;
 }; 
 
+
+const reset = () => {
+	customValue.value = "";
+	comparisonResults.value = null;
+}
 
 
 onMounted(async () => {
@@ -100,6 +110,10 @@ table{
 input {
 	padding: 8px 16px;
 	width: calc(100% - 32px);
+}
+
+.lottery-table {
+	padding-top: 48px;
 }
 
 
