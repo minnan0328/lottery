@@ -3,11 +3,13 @@
 		<div>
 			<label for="">是否開獎過</label>
 			<input type="text" v-model="customValue" @input="comparison">
-			<p>請輸入六個號碼 範例：1,2,3,4,5,6</p>
+			<button @click="generateUniqueRandomNumbers">隨機產生</button>
+			<p>請輸入六個號碼 範例：6,18,26,39,42,45</p>
 			<p>比對結果：</p>
 			<template v-if="comparisonResults && customValue">
-				<p v-if="comparisonResults">{{comparisonResults.Lotterydate}}</p>
-				<p v-if="comparisonResults">{{comparisonResults.Drawnumbersize}}</p>
+				<p v-if="comparisonResults">開獎日期：{{comparisonResults.Lotterydate}}</p>
+				<p v-if="comparisonResults">開獎號碼：{{matchLottery(comparisonResults.Drawnumbersize)[0]}}</p>
+				<p v-if="comparisonResults">特別號：{{matchLottery(comparisonResults.Drawnumbersize)[1]}}</p>
 			</template>
 			<span v-else-if="customValue">無結果</span>
 			<button @click="reset">清除</button>
@@ -24,7 +26,7 @@
 				<tbody>
 					<tr v-for="(item, idx) in lotteryData">
 						<td>{{item.Lotterydate}}</td>
-						<td>{{matchLottery(item.Drawnumbersize, idx)}}</td>
+						<td :key="displayLottery(item.Drawnumbersize, idx)">{{item.Drawnumbersize}}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -44,26 +46,35 @@ const comparisonResults = ref<string | object | null>(null);
 
 const combinations = new Map<string, number>();
 
-const matchLottery = (lottery: string, idx: number) => {
+const matchLottery = (lottery: string) => {
 	const pattern: RegExp = /^(?:\d+,){5}\d+/;
-	const match: RegExpMatchArray | null = lottery.match(pattern);
+	const specialPattern: RegExp = /^(?:\d+,){5}\d+,(.*)$/;
 	
-	const numbersBeforeSixth: string = match ? match[0] :  "";
-
-	combinations.set(numbersBeforeSixth, idx);
-
-	// console.log(numbersBeforeSixth);
+	const matches: RegExpMatchArray | null = lottery.match(pattern);
+	const special: RegExpMatchArray | null = lottery.match(specialPattern);
 	
+	if(matches && special) {
 
-	return numbersBeforeSixth;
+		return [matches[0], special[1]];
+	} else {
+		return [];
+	}
+
 };
 
-const comparison = (event: Event)  => {
-	const target = event.target as HTMLInputElement;
-	const index: number | undefined = combinations.get(customValue.value);
-	console.log(index);
-	
 
+const displayLottery = (lottery: string, idx: number) => {
+	const geyMatch: string[]  = matchLottery(lottery);
+	combinations.set(geyMatch[0], idx);
+	if(geyMatch) {
+		const numbersBeforeSixth: string = geyMatch[0];
+	
+		return numbersBeforeSixth;
+	}
+};
+
+const comparison = ()  => {
+	const index: number | undefined = combinations.get(customValue.value);
 	comparisonResults.value = index != null && combinations.has(customValue.value) ? lotteryData.value[index] : null;
 }; 
 
@@ -73,6 +84,22 @@ const reset = () => {
 	comparisonResults.value = null;
 }
 
+
+const generateUniqueRandomNumbers = () =>  {
+	const numbers: number[] = [];
+	
+	while (numbers.length < 6) {
+		const randomNumber = Math.floor(Math.random() * 49) + 1;
+		if (!numbers.includes(randomNumber)) {
+			numbers.push(randomNumber);
+		}
+	}
+	
+	numbers.sort((a, b) => a - b);
+
+	customValue.value = numbers.join(',');
+	comparison();
+}
 
 onMounted(async () => {
 	// const numbers: number[] = Array.from({ length: 49 }, (_, i) => i + 1);
